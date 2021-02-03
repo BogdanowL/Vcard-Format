@@ -1,0 +1,42 @@
+<?php
+
+namespace App;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Role extends Model
+{
+    public $timestamps = false;
+
+    protected $table = 'roles';
+
+    protected $fillable = [
+      'name', 'slug', 'permissons'
+    ];
+
+    protected $casts = [
+            'permissions' => 'array'
+        ];
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'roles_user', 'role_id', 'user_id');
+
+    }
+
+    public function hasAccess(array $permissions) : bool
+    {
+        foreach ($permissions as $permission)
+        {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function hasPermission($permission) : bool
+    {
+        return $this->permissions[$permission] ?? false;
+    }
+
+}
